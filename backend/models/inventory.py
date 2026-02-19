@@ -1,0 +1,26 @@
+from extensions import db
+
+class Inventory(db.Model):
+    __tablename__ = 'inventory'
+
+    id = db.Column(db.Integer, primary_key=True)
+    model_name = db.Column(db.String(100), nullable=False)
+    brand = db.Column(db.String(50))
+    frame_type = db.Column(db.String(50))
+    quantity = db.Column(db.Integer, default=0)
+    location = db.Column(db.String(100), nullable=False) # Rack/Drawer/Shelf
+    shop_branch = db.Column(db.String(100))
+    
+    cost_price = db.Column(db.Numeric(10, 2), nullable=False)
+    selling_price = db.Column(db.Numeric(10, 2), nullable=False)
+    low_stock_threshold = db.Column(db.Integer, default=5)
+    
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    def __repr__(self):
+        return f'<Inventory {self.model_name}>'
+
+    @property
+    def is_low_stock(self):
+        return self.quantity <= self.low_stock_threshold

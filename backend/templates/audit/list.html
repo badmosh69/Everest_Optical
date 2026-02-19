@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Audit Logs</h1>
+</div>
+
+<!-- Filters -->
+<div class="row mb-3">
+    <div class="col-md-4">
+        <form action="{{ url_for('audit.index') }}" method="GET">
+            <div class="input-group">
+                <select class="form-select" name="table_name">
+                    <option value="">All Tables</option>
+                    <option value="customers" {{ 'selected' if table_filter=='customers' }}>Customers</option>
+                    <option value="inventory" {{ 'selected' if table_filter=='inventory' }}>Inventory</option>
+                    <option value="prescriptions" {{ 'selected' if table_filter=='prescriptions' }}>Prescriptions
+                    </option>
+                    <option value="orders" {{ 'selected' if table_filter=='orders' }}>Orders</option>
+                </select>
+                <button class="btn btn-outline-secondary" type="submit">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-striped table-hover font-monospace">
+        <thead class="table-dark">
+            <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Table:ID</th>
+                <th>Field</th>
+                <th>Old Value</th>
+                <th>New Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs.items %}
+            <tr>
+                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ log.user.username if log.user else 'System' }}</td>
+                <td>
+                    <span
+                        class="badge bg-{{ 'success' if log.action == 'INSERT' else 'warning' if log.action == 'UPDATE' else 'danger' }}">
+                        {{ log.action }}
+                    </span>
+                </td>
+                <td>{{ log.table_name }}:{{ log.record_id }}</td>
+                <td>{{ log.field_name or '-' }}</td>
+                <td class="text-truncate" style="max-width: 150px;" title="{{ log.old_value }}">{{ log.old_value or ''
+                    }}</td>
+                <td class="text-truncate" style="max-width: 150px;" title="{{ log.new_value }}">{{ log.new_value or ''
+                    }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No logs found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if logs.has_prev %}
+        <li class="page-item"><a class="page-link"
+                href="{{ url_for('audit.index', page=logs.prev_num, table_name=table_filter) }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ logs.page }}</span></li>
+        {% if logs.has_next %}
+        <li class="page-item"><a class="page-link"
+                href="{{ url_for('audit.index', page=logs.next_num, table_name=table_filter) }}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endblock %}

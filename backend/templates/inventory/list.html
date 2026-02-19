@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Inventory</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('inventory.add') }}" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus"></i> Add New Item
+        </a>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <form action="{{ url_for('inventory.index') }}" method="GET" class="d-flex">
+            <input class="form-control me-2" type="search" placeholder="Search Model, Brand..." name="search"
+                value="{{ search }}">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Model Name</th>
+                <th>Brand</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th class="text-center">Qty</th>
+                <th class="text-end">Cost</th>
+                <th class="text-end">Sell Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items.items %}
+            <tr class="{{ 'table-danger' if item.is_low_stock else '' }}">
+                <td>
+                    {{ item.model_name }}
+                    {% if item.is_low_stock %}
+                    <span class="badge bg-danger ms-2">Low Stock</span>
+                    {% endif %}
+                </td>
+                <td>{{ item.brand }}</td>
+                <td>{{ item.frame_type }}</td>
+                <td>{{ item.location }}</td>
+                <td class="text-center fw-bold">{{ item.quantity }}</td>
+                <td class="text-end">{{ item.cost_price }}</td>
+                <td class="text-end">{{ item.selling_price }}</td>
+                <td>
+                    <a href="{{ url_for('inventory.edit', id=item.id) }}" class="btn btn-sm btn-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No inventory items found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if items.has_prev %}
+        <li class="page-item"><a class="page-link"
+                href="{{ url_for('inventory.index', page=items.prev_num, search=search) }}">Previous</a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+
+        <li class="page-item active"><span class="page-link">{{ items.page }}</span></li>
+
+        {% if items.has_next %}
+        <li class="page-item"><a class="page-link"
+                href="{{ url_for('inventory.index', page=items.next_num, search=search) }}">Next</a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+    </ul>
+</nav>
+
+{% endblock %}

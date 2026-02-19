@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">Edit Order #{{ order.order_no }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="editOrderForm">
+
+                    <!-- Top Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Customer</label>
+                            <input type="text" class="form-control" value="{{ order.customer.name }}" disabled>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Delivery Date</label>
+                            <input type="date" class="form-control" name="delivery_date"
+                                value="{{ order.delivery_date.strftime('%Y-%m-%d') if order.delivery_date }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="Pending" {{ 'selected' if order.status=='Pending' }}>Pending</option>
+                                <option value="In Progress" {{ 'selected' if order.status=='In Progress' }}>In Progress
+                                </option>
+                                <option value="Ready" {{ 'selected' if order.status=='Ready' }}>Ready</option>
+                                <option value="Delivered" {{ 'selected' if order.status=='Delivered' }}>Delivered
+                                </option>
+                                <option value="Cancelled" {{ 'selected' if order.status=='Cancelled' }}>Cancelled
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Delivery Mode</label>
+                            <select class="form-select" name="delivery_mode">
+                                <option value="Self" {{ 'selected' if order.delivery_mode=='Self' }}>Self Pickup (Store)
+                                </option>
+                                <option value="Courier" {{ 'selected' if order.delivery_mode=='Courier' }}>Courier
+                                </option>
+                                <option value="Home Delivery" {{ 'selected' if order.delivery_mode=='Home Delivery' }}>
+                                    Home Delivery (Staff)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Order Items -->
+                    <h5 class="mb-3">Order Items</h5>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered" id="itemsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item Description (Note: Manual)</th>
+                                    <th width="150">Quantity</th>
+                                    <th width="150">Unit Price</th>
+                                    <th width="150">Total</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items %}
+                                <tr>
+                                    <td><input type="text" class="form-control" name="item_desc[]" required
+                                            value="Item #{{ item.id }} (Update Desc logic needed)"
+                                            placeholder="Description"></td>
+                                    <td><input type="number" class="form-control qty" name="quantity[]"
+                                            value="{{ item.quantity }}" min="1" required></td>
+                                    <td><input type="number" class="form-control price" name="unit_price[]"
+                                            value="{{ item.unit_price }}" min="0" step="0.01" required></td>
+                                    <td><input type="text" class="form-control row-total" readonly
+                                            value="{{ (item.quantity * item.unit_price) }}"></td>
+                                    <td><button type="button" class="btn btn-danger btn-sm remove-row"><i
+                                                class="fas fa-times"></i></button></td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td><input type="text" class="form-control" name="item_desc[]" required
+                                            placeholder="Description"></td>
+                                    <td><input type="number" class="form-control qty" name="quantity[]" value="1"
+                                            min="1" required></td>
+                                    <td><input type="number" class="form-control price" name="unit_price[]" value="0"
+                                            min="0" step="0.01" required></td>
+                                    <td><input type="text" class="form-control row-total" readonly value="0.00"></td>
+                                    <td><button type="button" class="btn btn-danger btn-sm remove-row"><i
+                                                class="fas fa-times"></i></button></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="addRow">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                    </div>
+
+                    <hr>
+
+                    <!-- Billing Logic -->
+                    <div class="row justify-content-end">
+                        <div class="col-md-4">
+                            <div class="mb-2 row">
+                                <label class="col-sm-6 col-form-label text-end fw-bold">Subtotal:</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control" id="subtotalAmount" readonly value="0.00">
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <label class="col-sm-6 col-form-label text-end fw-bold text-success">Discount:</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control text-success" id="discountAmount"
+                                        name="discount" value="{{ order.discount or 0 }}" min="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="mb-2 row border-top pt-2">
+                                <label class="col-sm-6 col-form-label text-end fw-bold">Grand Total:</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control fw-bold" id="totalAmount" readonly
+                                        value="{{ order.total_amount }}">
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <label class="col-sm-6 col-form-label text-end fw-bold">Advance:</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control" id="advanceAmount" name="advance_amount"
+                                        value="{{ order.advance_amount }}" min="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label class="col-sm-6 col-form-label text-end fw-bold text-danger">Balance:</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control fw-bold text-danger" id="balanceAmount"
+                                        readonly value="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('order.view', id=order.id) }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-warning btn-lg">Update Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const table = document.querySelector('#itemsTable tbody');
+
+        // Initial Calculation to set Subtotal/Balance correctly on load
+        calculateTotals();
+
+        document.getElementById('addRow').addEventListener('click', function () {
+            const newRow = table.rows[0].cloneNode(true);
+            newRow.querySelectorAll('input').forEach(input => input.value = input.classList.contains('qty') ? 1 : '');
+            newRow.querySelector('.row-total').value = '0.00';
+            table.appendChild(newRow);
+        });
+
+        table.addEventListener('click', function (e) {
+            if (e.target.closest('.remove-row')) {
+                if (table.rows.length > 1) {
+                    e.target.closest('tr').remove();
+                    calculateTotals();
+                }
+            }
+        });
+
+        document.querySelector('form').addEventListener('input', function (e) {
+            if (e.target.classList.contains('qty') || e.target.classList.contains('price')) {
+                const row = e.target.closest('tr');
+                const qty = parseFloat(row.querySelector('.qty').value) || 0;
+                const price = parseFloat(row.querySelector('.price').value) || 0;
+                row.querySelector('.row-total').value = (qty * price).toFixed(2);
+                calculateTotals();
+            }
+            if (e.target.id === 'advanceAmount' || e.target.id === 'discountAmount') {
+                calculateTotals();
+            }
+        });
+
+        function calculateTotals() {
+            let subtotal = 0;
+            document.querySelectorAll('.row-total').forEach(input => {
+                subtotal += parseFloat(input.value) || 0;
+            });
+            document.getElementById('subtotalAmount').value = subtotal.toFixed(2);
+
+            const discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+            let total = subtotal - discount;
+            if (total < 0) total = 0;
+
+            document.getElementById('totalAmount').value = total.toFixed(2);
+
+            const advance = parseFloat(document.getElementById('advanceAmount').value) || 0;
+            const balance = total - advance;
+            document.getElementById('balanceAmount').value = balance.toFixed(2);
+        }
+    });
+</script>
+{% endblock %}

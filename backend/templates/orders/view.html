@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9">
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-end mb-3 no-print">
+            <button onclick="window.print()" class="btn btn-secondary me-2"><i class="fas fa-print"></i> Print</button>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('order.edit', id=order.id) }}" class="btn btn-warning me-2"><i class="fas fa-edit"></i>
+                Edit</a>
+            {% endif %}
+            <a href="{{ url_for('customer.index') }}" class="btn btn-outline-primary">Back to List</a>
+        </div>
+
+        <div class="card shadow-lg border-0" id="invoiceArea">
+            <div class="card-body p-5">
+
+                <!-- Header -->
+                <div class="row border-bottom pb-4 mb-4">
+                    <div class="col-md-6">
+                        <h2 class="fw-bold text-primary">Optical ERP</h2>
+                        <p class="mb-0">Store Address Line 1</p>
+                        <p>Phone: +1 234 567 890</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <h4 class="mb-1">INVOICE</h4>
+                        <p class="text-muted mb-1">Order #: {{ order.order_no }}</p>
+                        <p class="text-muted mb-1">Date: {{ order.issue_date.strftime('%d %b %Y') }}</p>
+                        <span class="badge bg-{{ 'success' if order.status == 'Delivered' else 'warning' }} fs-6">{{
+                            order.status }}</span>
+                    </div>
+                </div>
+
+                <!-- Customer Details -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="text-secondary">Bill To:</h5>
+                        <h4 class="mb-0">{{ order.customer.name }}</h4>
+                        <p class="mb-0">{{ order.customer.care_of }}</p>
+                        <p>{{ order.customer.phone }}</p>
+                    </div>
+                </div>
+
+                <!-- Prescription Snapshot -->
+                {% if order.prescription %}
+                <div class="alert alert-light border mb-4">
+                    <strong>Rx used:</strong> RE: {{ order.prescription.re_sph }}/{{ order.prescription.re_cyl }} | LE:
+                    {{ order.prescription.le_sph }}/{{ order.prescription.le_cyl }}
+                </div>
+                {% endif %}
+
+                <!-- Items Table -->
+                <table class="table table-striped mb-4">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Item (Inventory ID)</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Unit Price</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items %}
+                        <tr>
+                            <td>
+                                {% if item.inventory_id %}
+                                Inventory Item #{{ item.inventory_id }}
+                                {% else %}
+                                Item (Manual Entry)
+                                {% endif %}
+                            </td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td class="text-end">{{ item.unit_price }}</td>
+                            <td class="text-end">{{ item.total_price }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Totals -->
+                <div class="row justify-content-end">
+                    <div class="col-md-5">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="text-end fw-bold">Total Amount:</td>
+                                <td class="text-end fw-bold">{{ order.total_amount }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end">Advance Paid:</td>
+                                <td class="text-end text-success">- {{ order.advance_amount }}</td>
+                            </tr>
+                            <tr class="border-top">
+                                <td class="text-end fw-bold fs-5 text-danger">Balance Due:</td>
+                                <td class="text-end fw-bold fs-5 text-danger">{{ order.balance_amount }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer bg-light text-center text-muted p-3">
+                <small>Thank you for your business!</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            background-color: white;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border: none !important;
+        }
+    }
+</style>
+{% endblock %}

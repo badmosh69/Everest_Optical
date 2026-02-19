@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Add Prescription for {{ customer.name }}</h4>
+                <!-- OCR Upload Trigger -->
+                <button class="btn btn-light btn-sm text-dark" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#ocrCollapse">
+                    <i class="fas fa-camera"></i> Scan Image
+                </button>
+            </div>
+            <div class="card-body">
+
+                <!-- OCR Upload Section -->
+                <div class="collapse mb-4" id="ocrCollapse">
+                    <div class="card card-body bg-light">
+                        <label class="form-label">Upload Prescription Image (Auto-fill)</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="ocrFile" accept="image/*">
+                            <button class="btn btn-primary" type="button" id="btnScan" onclick="uploadOCR()">
+                                <i class="fas fa-magic"></i> Scan
+                            </button>
+                        </div>
+                        <div id="ocrStatus" class="mt-2 text-muted small"></div>
+                    </div>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="alert alert-info py-2">
+                        <small><i class="fas fa-info-circle"></i> Upload image below to save it with this
+                            prescription.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Attach Prescription Image (Optional)</label>
+                        <input type="file" class="form-control" name="prescription_image" accept="image/*">
+                    </div>
+
+                    <h5 class="border-bottom pb-2">Right Eye (OD)</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">SPH</label>
+                            <input type="number" step="0.25" class="form-control" name="re_sph" id="re_sph"
+                                placeholder="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">CYL</label>
+                            <input type="number" step="0.25" class="form-control" name="re_cyl" id="re_cyl"
+                                placeholder="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">AXIS</label>
+                            <input type="number" class="form-control" name="re_axis" id="re_axis" placeholder="0-180">
+                        </div>
+                    </div>
+
+                    <h5 class="border-bottom pb-2 mt-4">Left Eye (OS)</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">SPH</label>
+                            <input type="number" step="0.25" class="form-control" name="le_sph" id="le_sph"
+                                placeholder="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">CYL</label>
+                            <input type="number" step="0.25" class="form-control" name="le_cyl" id="le_cyl"
+                                placeholder="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">AXIS</label>
+                            <input type="number" class="form-control" name="le_axis" id="le_axis" placeholder="0-180">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-4">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" rows="3"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('customer.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success">Save Prescription</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function uploadOCR() {
+        const fileInput = document.getElementById('ocrFile');
+        const statusDiv = document.getElementById('ocrStatus');
+        const btnScan = document.getElementById('btnScan');
+
+        if (fileInput.files.length === 0) {
+            statusDiv.innerHTML = '<span class="text-danger">Please create select an image first.</span>';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        // UI Feedback
+        btnScan.disabled = true;
+        btnScan.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Scanning...';
+        statusDiv.innerHTML = 'Uploading and processing... This may take a few seconds.';
+
+        try {
+            const response = await fetch("{{ url_for('prescription.ocr_scan') }}", {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                statusDiv.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Scan complete! verify numbers.</span>';
+
+                // Auto-fill fields if keys exist
+                if (result.re_sph) document.getElementById('re_sph').value = result.re_sph;
+                if (result.re_cyl) document.getElementById('re_cyl').value = result.re_cyl;
+                if (result.re_axis) document.getElementById('re_axis').value = result.re_axis;
+
+                if (result.le_sph) document.getElementById('le_sph').value = result.le_sph;
+                if (result.le_cyl) document.getElementById('le_cyl').value = result.le_cyl;
+                if (result.le_axis) document.getElementById('le_axis').value = result.le_axis;
+
+            } else {
+                statusDiv.innerHTML = `<span class="text-danger">Error: ${result.error}</span>`;
+            }
+        } catch (error) {
+            statusDiv.innerHTML = `<span class="text-danger">Network error: ${error.message}</span>`;
+        } finally {
+            btnScan.disabled = false;
+            btnScan.innerHTML = '<i class="fas fa-magic"></i> Scan';
+        }
+    }
+</script>
+{% endblock %}

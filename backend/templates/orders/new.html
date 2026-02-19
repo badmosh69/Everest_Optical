@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">New Order for {{ customer.name }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="orderForm">
+                    <!-- Top Section: Link Data -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Link Prescription (Optional)</label>
+                            <select class="form-select" name="prescription_id">
+                                <option value="">-- Select Prescription --</option>
+                                {% for rx in prescriptions %}
+                                <option value="{{ rx.id }}">
+                                    {{ rx.created_at.strftime('%Y-%m-%d') }} (RE: {{ rx.re_sph }}/{{ rx.re_cyl }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Delivery Date</label>
+                            <input type="date" class="form-control" name="delivery_date" id="deliveryDate" required>
+                            <small class="text-muted" id="dateHelp"></small>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="Pending">Pending</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Ready">Ready</option>
+                                <option value="Delivered">Delivered</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Middle Section: Line Items -->
+                    <h5 class="mb-3">Order Items</h5>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered" id="itemsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item Description</th>
+                                    <th width="150">Quantity</th>
+                                    <th width="150">Unit Price</th>
+                                    <th width="150">Total</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" class="form-control" name="item_desc[]" required
+                                            placeholder="e.g. Frame Model X"></td>
+                                    <td><input type="number" class="form-control qty" name="quantity[]" value="1"
+                                            min="1" required></td>
+                                    <td><input type="number" class="form-control price" name="unit_price[]" value="0"
+                                            min="0" step="0.01" required></td>
+                                    <td><input type="text" class="form-control row-total" readonly value="0.00"></td>
+                                    <td><button type="button" class="btn btn-danger btn-sm remove-row"><i
+                                                class="fas fa-times"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="addRow">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                    </div>
+
+                    <hr>
+
+                    <!-- Bottom Section: Billing -->
+                    <div class="row justify-content-end">
+                        <div class="col-md-4">
+                            <div class="mb-2 row">
+                                <label class="col-sm-6 col-form-label text-end fw-bold">Subtotal:</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control" id="subtotalAmount" readonly value="0.00">
+                                </div>
+                            </div>
+                            <!-- Discount Field -->
+                            <div class="mb-2 row">
+                                <label class="col-sm-6 col-form-label text-end fw-bold text-success">Discount:</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control text-success" id="discountAmount"
+                                        name="discount" value="0" min="0" step="0.01">
+                                </div>
+                            </div>
+
+                            <div class="mb-2 row border-top pt-2">
+                                <label class="col-sm-6 col-form-label text-end fw-bold">Grand Total:</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control fw-bold" id="totalAmount" readonly
+                                        value="0.00">
+                                </div>
+                            </div>
+
+                            <div class="mb-2 row">
+                                <label class="col-sm-6 col-form-label text-end fw-bold">Advance:</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control" id="advanceAmount" name="advance_amount"
+                                        value="0" min="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label class="col-sm-6 col-form-label text-end fw-bold text-danger">Balance:</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control fw-bold text-danger" id="balanceAmount"
+                                        readonly value="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('customer.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success btn-lg">Create Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Date Logic ---
+        const dateInput = document.getElementById('deliveryDate');
+        const helpText = document.getElementById('dateHelp');
+
+        // Set Default to Tomorrow
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const yyyy = tomorrow.getFullYear();
+        const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const dd = String(tomorrow.getDate()).padStart(2, '0');
+        const tomorrowStr = `${yyyy}-${mm}-${dd}`;
+
+        dateInput.value = tomorrowStr;
+        dateInput.min = new Date().toISOString().split("T")[0]; // Prevent past dates
+        helpText.textContent = "Default set to Tomorrow. Cannot select past dates.";
+
+        // --- Billing Logic ---
+        const table = document.querySelector('#itemsTable tbody');
+
+        document.getElementById('addRow').addEventListener('click', function () {
+            const newRow = table.rows[0].cloneNode(true);
+            newRow.querySelectorAll('input').forEach(input => input.value = input.classList.contains('qty') ? 1 : '');
+            newRow.querySelector('.row-total').value = '0.00';
+            table.appendChild(newRow);
+        });
+
+        table.addEventListener('click', function (e) {
+            if (e.target.closest('.remove-row')) {
+                if (table.rows.length > 1) {
+                    e.target.closest('tr').remove();
+                    calculateTotals();
+                }
+            }
+        });
+
+        document.querySelector('form').addEventListener('input', function (e) {
+            if (e.target.classList.contains('qty') || e.target.classList.contains('price')) {
+                const row = e.target.closest('tr');
+                const qty = parseFloat(row.querySelector('.qty').value) || 0;
+                const price = parseFloat(row.querySelector('.price').value) || 0;
+                row.querySelector('.row-total').value = (qty * price).toFixed(2);
+                calculateTotals();
+            }
+            if (e.target.id === 'advanceAmount' || e.target.id === 'discountAmount') {
+                calculateTotals();
+            }
+        });
+
+        function calculateTotals() {
+            let subtotal = 0;
+            document.querySelectorAll('.row-total').forEach(input => {
+                subtotal += parseFloat(input.value) || 0;
+            });
+            document.getElementById('subtotalAmount').value = subtotal.toFixed(2);
+
+            const discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+            let total = subtotal - discount;
+            if (total < 0) total = 0;
+
+            document.getElementById('totalAmount').value = total.toFixed(2);
+
+            const advance = parseFloat(document.getElementById('advanceAmount').value) || 0;
+            const balance = total - advance;
+            document.getElementById('balanceAmount').value = balance.toFixed(2);
+        }
+    });
+</script>
+{% endblock %}
