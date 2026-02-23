@@ -55,7 +55,7 @@
                 <table class="table table-striped mb-4">
                     <thead class="table-dark">
                         <tr>
-                            <th>Item (Inventory ID)</th>
+                            <th>Item / Description</th>
                             <th class="text-center">Qty</th>
                             <th class="text-end">Unit Price</th>
                             <th class="text-end">Total</th>
@@ -64,16 +64,10 @@
                     <tbody>
                         {% for item in order.items %}
                         <tr>
-                            <td>
-                                {% if item.inventory_id %}
-                                Inventory Item #{{ item.inventory_id }}
-                                {% else %}
-                                Item (Manual Entry)
-                                {% endif %}
-                            </td>
+                            <td>{{ item.display_name }}</td>
                             <td class="text-center">{{ item.quantity }}</td>
-                            <td class="text-end">{{ item.unit_price }}</td>
-                            <td class="text-end">{{ item.total_price }}</td>
+                            <td class="text-end">₹{{ item.unit_price }}</td>
+                            <td class="text-end">₹{{ item.total_price }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

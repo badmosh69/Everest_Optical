@@ -47,25 +47,9 @@ def new(customer_id):
                     total_amount += (qty * price)
                     
                     items_to_add.append({
+                        'desc': descriptions[i],
                         'qty': qty,
                         'price': price
-                        # 'desc': descriptions[i]  -- Note: Schema doesn't have desc on OrderItem yet, 
-                        # strictly schema says inventory_id. 
-                        # For Phase 5 (Pre-Inventory), we might need a temporary field or just rely on Inventory later.
-                        # Wait, the prompt said "Inventory ERP" is Phase 6.
-                        # The schema defined earlier for `order_items` only has `inventory_id`.
-                        # It does NOT have a description field. 
-                        # CRITICAL FIX: I need to handle this. 
-                        # Option A: Add a temporary description field to schema? No, strictly follow schema.
-                        # Option B: Create dummy inventory items? 
-                        # Option C: Just rely on Price/Qty for "Billing Logic" checkpoint and assume Inventory linkage later.
-                        # BUT, for an invoice, you need to know WHAT you sold.
-                        # check schema.sql: `order_items` -> `inventory_id` (Integer).
-                        # I cannot store "Rayban Frame" text in `order_items` if I follow the schema strictly.
-                        # I will add a `description` field to `order_items` in the model/schema for flexibility OR
-                        # strictly, I should assume Inventory exists. 
-                        # Since Inventory is Phase 6, I will assume we are selling "Generic Item" or I should have added a description field.
-                        # I will add a comment about this. I'll stick to strict schema. 
                     })
             
             # Generate Order No
@@ -88,9 +72,9 @@ def new(customer_id):
             db.session.flush() # Get ID
             
             for item in items_to_add:
-                # Note: Inventory ID is null for now as per plan
                 order_item = OrderItem(
                     order_id=new_order.id,
+                    description=item['desc'],
                     quantity=item['qty'],
                     unit_price=item['price']
                 )
@@ -141,23 +125,14 @@ def edit(id):
             subtotal = 0
             
             for i in range(len(descriptions)):
-                if descriptions[i]: # If description exists (using it as proxy for item existence)
+                if descriptions[i]:
                     qty = int(quantities[i])
                     price = float(prices[i])
                     subtotal += (qty * price)
-                    
-                    # Note: We are not storing description/name in DB yet (Phase 5 restriction), 
-                    # but usually we would. For now, valid items are just Qty/Price.
-                    # Ideally, we should have added a 'description' column to OrderItem in Phase 11/12.
-                    # Since we didn't, we just store Qty and Price. 
-                    # WAIT: If we don't store description, calling it "Full Edit" is tricky if user expects to change names.
-                    # But the schema.sql and models.py (OrderItem) only have `inventory_id`, `quantity`, `unit_price`.
-                    # We are stuck with that unless we add `description` column now.
-                    # Given "Final Polish", I'll stick to the model but maybe `inventory_id` was meant for this?
-                    # Let's just create the items.
-                    
+
                     new_item = OrderItem(
                         order_id=order.id,
+                        description=descriptions[i],
                         quantity=qty,
                         unit_price=price
                     )

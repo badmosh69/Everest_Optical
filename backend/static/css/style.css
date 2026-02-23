@@ -3,7 +3,7 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar Styles */
+/* ── SIDEBAR (desktop) ─────────────────────────────────── */
 .sidebar {
     position: fixed;
     top: 0;
@@ -15,23 +15,122 @@ body {
     width: 240px;
 }
 
+/* ── MOBILE: hide sidebar, show bottom nav ──────────────── */
 @media (max-width: 767.98px) {
     .sidebar {
-        width: 100%;
-        position: relative;
-        height: auto;
-        padding-top: 0;
+        display: none !important;
     }
 
     .main-content {
         margin-left: 0 !important;
+        padding-bottom: 80px;
+        /* space for bottom nav */
+    }
+
+    /* Bottom navigation bar */
+    #mobileBottomNav {
+        display: flex !important;
+    }
+
+    /* Make tables scroll horizontally */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Larger tap targets for buttons */
+    .btn {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-sm {
+        min-height: 38px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    /* Stack form rows on small screens */
+    .row>[class*="col-md-"] {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Card padding reduction on mobile */
+    .card-body {
+        padding: 1rem;
+    }
+
+    /* Action buttons in tables: wrap nicely */
+    td .d-flex {
+        flex-wrap: wrap;
+        gap: 4px;
     }
 }
 
+/* Bottom nav bar styles */
+#mobileBottomNav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: #212529;
+    border-top: 1px solid #373b3e;
+    height: 64px;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 8px;
+}
+
+#mobileBottomNav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #adb5bd;
+    text-decoration: none;
+    font-size: 0.65rem;
+    gap: 2px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: color 0.2s;
+}
+
+#mobileBottomNav a i {
+    font-size: 1.2rem;
+}
+
+#mobileBottomNav a:hover,
+#mobileBottomNav a.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="light"] #mobileBottomNav {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+[data-bs-theme="light"] #mobileBottomNav a {
+    color: #495057;
+}
+
+[data-bs-theme="light"] #mobileBottomNav a:hover,
+[data-bs-theme="light"] #mobileBottomNav a.active {
+    color: #0d6efd;
+    background: rgba(13, 110, 253, 0.08);
+}
+
+/* ── SIDEBAR NAV LINKS ──────────────────────────────────── */
 .sidebar .nav-link {
     font-weight: 500;
     color: #b3b3b3;
     padding: 10px 20px;
+    border-radius: 6px;
+    margin: 2px 8px;
+    transition: background 0.15s, color 0.15s;
 }
 
 .sidebar .nav-link:hover {
@@ -42,10 +141,9 @@ body {
 .sidebar .nav-link.active {
     color: #ffffff;
     background-color: #0d6efd;
-    /* Bootstrap Primary */
 }
 
-/* Card Improvements */
+/* ── CARDS ──────────────────────────────────────────────── */
 .card {
     border: none;
     border-radius: 10px;
@@ -62,7 +160,7 @@ body {
     background-color: rgba(0, 0, 0, 0.03);
 }
 
-/* Stats Card Borders */
+/* ── STAT CARD BORDERS ──────────────────────────────────── */
 .border-left-primary {
     border-left: 0.25rem solid #4e73df !important;
 }
@@ -79,31 +177,14 @@ body {
     border-left: 0.25rem solid #f6c23e !important;
 }
 
-/* Dark Mode Adjustments */
-/* Dark Mode Adjustments */
-[data-bs-theme="dark"] .sidebar {
-    background-color: #212529 !important;
-    border-right: 1px solid #373b3e;
-}
-
-[data-bs-theme="dark"] .sidebar .text-white {
-    color: #f8f9fa !important;
-}
-
-/* Light Mode Sidebar Fixes */
-[data-bs-theme="light"] .sidebar .text-white {
-    color: #212529 !important;
-    /* Title */
-}
-
-[data-bs-theme="light"] .sidebar .text-muted {
-    color: #6c757d !important;
-    /* Admin/Account Headers */
+/* ── LIGHT MODE SIDEBAR ─────────────────────────────────── */
+[data-bs-theme="light"] .sidebar {
+    background-color: #f8f9fa !important;
+    border-right: 1px solid #dee2e6;
 }
 
 [data-bs-theme="light"] .sidebar .nav-link {
     color: #333 !important;
-    /* Links */
 }
 
 [data-bs-theme="light"] .sidebar .nav-link:hover {
@@ -116,6 +197,21 @@ body {
     background-color: #0d6efd;
 }
 
+[data-bs-theme="light"] .sidebar .text-white,
+[data-bs-theme="light"] .sidebar h4 {
+    color: #212529 !important;
+}
+
+[data-bs-theme="light"] .sidebar .text-muted {
+    color: #6c757d !important;
+}
+
+/* ── DARK MODE ──────────────────────────────────────────── */
+[data-bs-theme="dark"] .sidebar {
+    background-color: #212529 !important;
+    border-right: 1px solid #373b3e;
+}
+
 [data-bs-theme="dark"] .card {
     background-color: #2b3035;
     border: 1px solid #373b3e;
@@ -123,7 +219,6 @@ body {
 
 [data-bs-theme="dark"] .card-header {
     background-color: rgba(255, 255, 255, 0.05);
-    /* Slight white tint for dark mode headers */
     color: #e9ecef;
 }
 

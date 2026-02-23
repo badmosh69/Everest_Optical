@@ -41,7 +41,8 @@ def add():
                 shop_branch=request.form.get('shop_branch'),
                 cost_price=float(request.form.get('cost_price', 0)),
                 selling_price=float(request.form.get('selling_price', 0)),
-                low_stock_threshold=int(request.form.get('low_stock_threshold', 5))
+                low_stock_threshold=int(request.form.get('low_stock_threshold', 5)),
+                color_stock=request.form.get('color_stock') or None
             )
             db.session.add(new_item)
             db.session.commit()
@@ -69,6 +70,7 @@ def edit(id):
             item.cost_price = float(request.form.get('cost_price', 0))
             item.selling_price = float(request.form.get('selling_price', 0))
             item.low_stock_threshold = int(request.form.get('low_stock_threshold', 5))
+            item.color_stock = request.form.get('color_stock') or None
             
             db.session.commit()
             flash('Inventory updated!', 'success')

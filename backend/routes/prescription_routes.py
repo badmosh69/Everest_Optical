@@ -21,33 +21,31 @@ def add(customer_id):
     
     if request.method == 'POST':
         try:
-            # Extract data safely
             re_sph = request.form.get('re_sph') or None
             re_cyl = request.form.get('re_cyl') or None
             re_axis = request.form.get('re_axis') or None
             le_sph = request.form.get('le_sph') or None
             le_cyl = request.form.get('le_cyl') or None
             le_axis = request.form.get('le_axis') or None
-            
+            addition = request.form.get('addition') or None
             notes = request.form.get('notes')
             
-            # Handle Image Upload (Permanent)
             image_path = None
             if 'prescription_image' in request.files:
                 file = request.files['prescription_image']
                 if file and file.filename != '' and allowed_file(file.filename):
                     filename = secure_filename(f"presc_{customer_id}_{uuid.uuid4().hex[:8]}.{file.filename.rsplit('.', 1)[1].lower()}")
-                    # Save to static/uploads for serving
                     save_dir = os.path.join('static', 'uploads')
                     os.makedirs(save_dir, exist_ok=True)
                     filepath = os.path.join(save_dir, filename)
                     file.save(filepath)
-                    image_path = filepath.replace('\\', '/') # Store relative path for template
+                    image_path = filepath.replace('\\', '/')
 
             new_prescription = Prescription(
                 customer_id=customer_id,
                 re_sph=re_sph, re_cyl=re_cyl, re_axis=re_axis,
                 le_sph=le_sph, le_cyl=le_cyl, le_axis=le_axis,
+                addition=addition,
                 notes=notes,
                 image_path=image_path,
                 created_by=current_user.id
@@ -56,7 +54,7 @@ def add(customer_id):
             db.session.add(new_prescription)
             db.session.commit()
             flash('Prescription added successfully!', 'success')
-            return redirect(url_for('customer.index')) 
+            return redirect(url_for('prescription.history', customer_id=customer_id))
             
         except Exception as e:
             db.session.rollback()
@@ -77,6 +75,49 @@ def view(id):
     prescription = Prescription.query.get_or_404(id)
     return render_template('prescriptions/view.html', prescription=prescription)
 
+@prescription_bp.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit(id):
+    prescription = Prescription.query.get_or_404(id)
+    customer = prescription.customer
+
+    if request.method == 'POST':
+        try:
+            prescription.re_sph = request.form.get('re_sph') or None
+            prescription.re_cyl = request.form.get('re_cyl') or None
+            prescription.re_axis = request.form.get('re_axis') or None
+            prescription.le_sph = request.form.get('le_sph') or None
+            prescription.le_cyl = request.form.get('le_cyl') or None
+            prescription.le_axis = request.form.get('le_axis') or None
+            prescription.addition = request.form.get('addition') or None
+            prescription.notes = request.form.get('notes')
+            db.session.commit()
+            flash('Prescription updated successfully!', 'success')
+            return redirect(url_for('prescription.history', customer_id=customer.id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating prescription: {str(e)}', 'danger')
+
+    return render_template('prescriptions/edit.html', prescription=prescription, customer=customer)
+
+@prescription_bp.route('/delete/<int:id>', methods=['POST'])
+@login_required
+def delete(id):
+    if not current_user.is_admin:
+        flash('Only admins can delete prescriptions.', 'danger')
+        return redirect(url_for('customer.index'))
+    
+    prescription = Prescription.query.get_or_404(id)
+    customer_id = prescription.customer_id
+    try:
+        db.session.delete(prescription)
+        db.session.commit()
+        flash('Prescription deleted permanently.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting: {str(e)}', 'danger')
+    return redirect(url_for('prescription.history', customer_id=customer_id))
+
 @prescription_bp.route('/ocr_scan', methods=['POST'])
 @login_required
 def ocr_scan():
@@ -90,11 +131,8 @@ def ocr_scan():
         filename = secure_filename(file.filename)
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
-        
-        # Process Image
         try:
             data = process_prescription_image(filepath)
-            # Cleanup temp file
             os.remove(filepath)
             return jsonify(data)
         except Exception as e:

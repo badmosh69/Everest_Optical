@@ -7,44 +7,90 @@
         <a href="{{ url_for('prescription.add', customer_id=customer.id) }}" class="btn btn-sm btn-info text-white">
             <i class="fas fa-plus"></i> Add New
         </a>
-        <a href="{{ url_for('customer.index') }}" class="btn btn-sm btn-secondary ms-2">
-            Back to Customers
-        </a>
+        <a href="{{ url_for('customer.index') }}" class="btn btn-sm btn-secondary ms-2">Back</a>
     </div>
 </div>
 
 <div class="table-responsive">
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-striped align-middle">
         <thead class="table-dark">
             <tr>
                 <th>Date</th>
                 <th>RE (SPH / CYL / AXIS)</th>
                 <th>LE (SPH / CYL / AXIS)</th>
+                <th>ADD</th>
                 <th>Notes</th>
-                <th>Created By</th>
-                <th>Action</th>
+                <th>By</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for rx in prescriptions %}
             <tr>
-                <td>{{ rx.created_at.strftime('%Y-%m-%d') }}</td>
-                <td>{{ rx.re_sph }} / {{ rx.re_cyl }} / {{ rx.re_axis }}</td>
-                <td>{{ rx.le_sph }} / {{ rx.le_cyl }} / {{ rx.le_axis }}</td>
+                <td>{{ rx.created_at.strftime('%d-%m-%Y') }}</td>
+                <td>{{ rx.re_sph or '-' }} / {{ rx.re_cyl or '-' }} / {{ rx.re_axis or '-' }}</td>
+                <td>{{ rx.le_sph or '-' }} / {{ rx.le_cyl or '-' }} / {{ rx.le_axis or '-' }}</td>
+                <td>{{ rx.addition or '-' }}</td>
                 <td>{{ rx.notes or '-' }}</td>
                 <td>{{ rx.creator.username if rx.creator else 'System' }}</td>
                 <td>
-                    <a href="{{ url_for('prescription.view', id=rx.id) }}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-eye"></i> View
-                    </a>
+                    <div class="d-flex gap-1 flex-wrap">
+                        <a href="{{ url_for('prescription.view', id=rx.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a href="{{ url_for('prescription.edit', id=rx.id) }}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% if current_user.is_admin %}
+                        <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="{{ rx.id }}"
+                            data-date="{{ rx.created_at.strftime('%d-%m-%Y') }}">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="5" class="text-center">No prescriptions found.</td>
+                <td colspan="7" class="text-center">No prescriptions found.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">⚠️ Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>You are about to <strong>permanently delete</strong> this prescription (<span
+                        id="deleteDate"></span>).</p>
+                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Yes, Delete Permanently</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-delete');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const date = btn.dataset.date;
+        document.getElementById('deleteDate').textContent = date;
+        document.getElementById('deleteForm').action = `/prescriptions/delete/${id}`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    });
+</script>
 {% endblock %}

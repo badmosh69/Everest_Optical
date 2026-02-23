@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request
-from flask_login import login_required
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_required, current_user
 from models.audit_log import AuditLog
 
 audit_bp = Blueprint('audit', __name__, url_prefix='/audit')
@@ -7,6 +7,10 @@ audit_bp = Blueprint('audit', __name__, url_prefix='/audit')
 @audit_bp.route('/')
 @login_required
 def index():
+    if not current_user.is_admin:
+        flash('Access denied. Audit logs are for admins only.', 'danger')
+        return redirect(url_for('dashboard.index'))
+
     page = request.args.get('page', 1, type=int)
     table_filter = request.args.get('table_name', '')
     

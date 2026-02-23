@@ -14,6 +14,7 @@ class Inventory(db.Model):
     cost_price = db.Column(db.Numeric(10, 2), nullable=False)
     selling_price = db.Column(db.Numeric(10, 2), nullable=False)
     low_stock_threshold = db.Column(db.Integer, default=5)
+    color_stock = db.Column(db.Text, nullable=True)  # e.g. "black-10, white-15, grey-5"
     
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())

@@ -1,0 +1,35 @@
+# ── Python ────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg-info/
+dist/
+build/
+
+# ── Environment & Secrets (NEVER commit these) ────────
+.env
+*.env
+
+# ── Local SQLite database ─────────────────────────────
+instance/
+*.db
+*.sqlite3
+
+# ── Flask uploads ─────────────────────────────────────
+backend/uploads/
+
+# ── OS junk ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDEs ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ── Misc temp files ───────────────────────────────────
+backend/tp.py

@@ -15,7 +15,10 @@ class Prescription(db.Model):
     le_sph = db.Column(db.Numeric(5, 2))
     le_cyl = db.Column(db.Numeric(5, 2))
     le_axis = db.Column(db.Integer)
-    
+
+    # Addition (reading add / near vision)
+    addition = db.Column(db.Numeric(5, 2))
+
     image_path = db.Column(db.String(255)) # Path to uploaded image
     
     notes = db.Column(db.Text)

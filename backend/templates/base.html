@@ -5,17 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Optical Shop ERP</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
 
-    <!-- Sidebar -->
+    <!-- Sidebar (desktop) -->
     {% if current_user.is_authenticated %}
     <nav id="sidebarMenu" class="d-md-block bg-dark sidebar collapse">
         <div class="position-sticky pt-3">
@@ -47,15 +44,17 @@
                         <i class="fas fa-boxes me-2"></i> Inventory
                     </a>
                 </li>
+                {% if current_user.is_admin %}
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint and 'audit' in request.endpoint else '' }}"
                         href="{{ url_for('audit.index') }}">
                         <i class="fas fa-history me-2"></i> Audit Logs
                     </a>
                 </li>
+                {% endif %}
             </ul>
 
-            {% if current_user.role == 'admin' %}
+            {% if current_user.is_admin %}
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                 <span>Admin</span>
             </h6>
@@ -81,6 +80,29 @@
             </ul>
         </div>
     </nav>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <div id="mobileBottomNav">
+        <a href="{{ url_for('dashboard.index') }}"
+            class="{{ 'active' if request.endpoint and 'dashboard' in request.endpoint else '' }}">
+            <i class="fas fa-tachometer-alt"></i><span>Home</span>
+        </a>
+        <a href="{{ url_for('customer.index') }}"
+            class="{{ 'active' if request.endpoint and 'customer' in request.endpoint else '' }}">
+            <i class="fas fa-users"></i><span>Customers</span>
+        </a>
+        <a href="{{ url_for('order.index') }}"
+            class="{{ 'active' if request.endpoint and 'order' in request.endpoint else '' }}">
+            <i class="fas fa-shopping-cart"></i><span>Orders</span>
+        </a>
+        <a href="{{ url_for('inventory.index') }}"
+            class="{{ 'active' if request.endpoint and 'inventory' in request.endpoint else '' }}">
+            <i class="fas fa-boxes"></i><span>Stock</span>
+        </a>
+        <a href="{{ url_for('auth.logout') }}">
+            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+        </a>
+    </div>
     {% endif %}
 
     <!-- Main Content Wrapper -->
@@ -91,14 +113,17 @@
         {% if current_user.is_authenticated %}
         <nav class="navbar navbar-expand-lg navbar-light bg-light rounded shadow-sm mb-4 mt-2">
             <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu"
-                    aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+                    aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+                <span class="navbar-brand fw-bold d-md-none ms-2">
+                    <i class="fas fa-glasses me-1"></i> Optical ERP
+                </span>
                 <span class="navbar-text ms-2 d-none d-md-block">
                     Welcome, <strong>{{ current_user.username }}</strong>
                 </span>
-
                 <div class="ms-auto d-flex align-items-center">
                     <!-- Dark Mode Toggle -->
                     <div class="form-check form-switch me-3">
@@ -129,18 +154,16 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Custom JS (Dark Mode) -->
+    <!-- Dark Mode JS -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const html = document.documentElement;
             const switchToggle = document.getElementById('darkModeSwitch');
 
-            // Load saved preference
             const savedTheme = localStorage.getItem('theme') || 'light';
             html.setAttribute('data-bs-theme', savedTheme);
             if (switchToggle) {
                 switchToggle.checked = savedTheme === 'dark';
-
                 switchToggle.addEventListener('change', () => {
                     const newTheme = switchToggle.checked ? 'dark' : 'light';
                     html.setAttribute('data-bs-theme', newTheme);
@@ -149,6 +172,7 @@
             }
         });
     </script>
+
 </body>
 
 </html>

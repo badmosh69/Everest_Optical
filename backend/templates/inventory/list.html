@@ -30,6 +30,7 @@
                 <th>Type</th>
                 <th>Location</th>
                 <th class="text-center">Qty</th>
+                <th>Color Stock</th>
                 <th class="text-end">Cost</th>
                 <th class="text-end">Sell Price</th>
                 <th>Actions</th>
@@ -48,6 +49,7 @@
                 <td>{{ item.frame_type }}</td>
                 <td>{{ item.location }}</td>
                 <td class="text-center fw-bold">{{ item.quantity }}</td>
+                <td><small class="text-muted">{{ item.color_stock or '-' }}</small></td>
                 <td class="text-end">{{ item.cost_price }}</td>
                 <td class="text-end">{{ item.selling_price }}</td>
                 <td>

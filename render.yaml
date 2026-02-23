@@ -9,3 +9,11 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: SECRET_KEY
+        sync: false          # Set manually in Render Dashboard
+      - key: DATABASE_URL
+        sync: false          # Set manually in Render Dashboard (your Neon URL)
+      - key: MAIL_USERNAME
+        sync: false          # Your Gmail address
+      - key: MAIL_PASSWORD
+        sync: false          # Your Gmail App Password (16 chars)

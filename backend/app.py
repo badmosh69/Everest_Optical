@@ -1,6 +1,6 @@
 from flask import Flask
 from config import Config
-from extensions import db, login_manager, bcrypt, migrate
+from extensions import db, login_manager, bcrypt, migrate, mail
 from routes.auth_routes import auth_bp
 from routes.dashboard_routes import dashboard_bp
 from models.user import User
@@ -14,13 +14,14 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     bcrypt.init_app(app)
     migrate.init_app(app, db)
+    mail.init_app(app)
 
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
 
     # Register Blueprints
     app.register_blueprint(auth_bp)

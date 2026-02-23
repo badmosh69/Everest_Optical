@@ -46,15 +46,23 @@ class OrderItem(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
-    inventory_id = db.Column(db.Integer, db.ForeignKey('inventory.id')) # Nullable for now until Inv Phase
-    
-    # We store these explicitly to preserve history even if inventory price changes
+    inventory_id = db.Column(db.Integer, db.ForeignKey('inventory.id'), nullable=True)
+
+    description = db.Column(db.String(255), nullable=True)   # Item name / description
     quantity = db.Column(db.Integer, nullable=False, default=1)
     unit_price = db.Column(db.Numeric(10, 2), nullable=False)
-    
-    # Relationships
-    # inventory = db.relationship('Inventory') # Uncomment in Phase 6
+
+    inventory = db.relationship('Inventory', lazy=True)
 
     @property
     def total_price(self):
         return (self.quantity or 0) * (self.unit_price or 0)
+
+    @property
+    def display_name(self):
+        if self.description:
+            return self.description
+        if self.inventory:
+            return self.inventory.name
+        return 'Item'
+
