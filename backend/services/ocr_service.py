@@ -1,12 +1,20 @@
-import easyocr
-import cv2
-import numpy as np
 import re
 import os
 
-# Initialize Reader once (it loads model into memory)
-# 'en' for English. GPU=False for compatibility if no CUDA.
-reader = easyocr.Reader(['en'], gpu=False)
+# OCR dependencies are optional — not installed on Render free tier
+# (easyocr + opencv are too large for free tier memory limits)
+OCR_AVAILABLE = False
+reader = None
+
+try:
+    import easyocr
+    import cv2
+    import numpy as np
+    reader = easyocr.Reader(['en'], gpu=False)
+    OCR_AVAILABLE = True
+except ImportError:
+    pass
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
@@ -14,7 +22,11 @@ def allowed_file(filename):
 def process_prescription_image(image_path):
     """
     Reads image, preprocesses it, runs OCR, and extracts optical details.
+    Returns an error dict if OCR libraries are not installed.
     """
+    if not OCR_AVAILABLE:
+        return {"error": "OCR not available on this server. Please enter prescription details manually."}
+
     try:
         # 1. Read Image
         img = cv2.imread(image_path)
@@ -23,16 +35,14 @@ def process_prescription_image(image_path):
 
         # 2. Preprocessing (Grayscale + Thresholding)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # Apply simple thresholding to clear noise
         _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
         # 3. Run EasyOCR
-        # detail=0 returns just the list of text strings
         results = reader.readtext(thresh, detail=0)
-        
+
         # 4. Parse Text
         extracted_data = parse_ocr_text(results)
-        
+
         return extracted_data
     except Exception as e:
         return {"error": str(e)}
