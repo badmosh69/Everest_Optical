@@ -2,7 +2,6 @@ services:
   - type: web
     name: everest-optical
     env: python
-    runtime: python3.11
     plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
