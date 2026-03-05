@@ -16,6 +16,16 @@ def _admin_required():
         return False
     return True
 
+import threading
+from flask import current_app
+
+def _send_async_email(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+        except Exception as e:
+            print(f"Async mail error: {e}")
+
 def _send_otp_email(user_email, otp, username):
     try:
         msg = Message(
@@ -33,10 +43,15 @@ If you did not request this, ignore this email.
 — Optical ERP
 """
         )
-        mail.send(msg)
+        
+        # Send email asynchronously to prevent Gunicorn worker timeout
+        app = current_app._get_current_object()
+        thread = threading.Thread(target=_send_async_email, args=(app, msg))
+        thread.start()
+        
         return True
     except Exception as e:
-        print(f"Mail error: {e}")
+        print(f"Mail threading error: {e}")
         return False
 
 
