@@ -21,7 +21,7 @@ from flask import current_app
 def _send_otp_email(user_email, otp, username):
     try:
         resend.api_key = current_app.config.get('RESEND_API_KEY')
-        sender_email = current_app.config.get('MAIL_DEFAULT_SENDER', 'onboarding@resend.dev')
+        sender_email = current_app.config.get('MAIL_DEFAULT_SENDER', 'Optical ERP <onboarding@resend.dev>')
         
         html_body = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -35,7 +35,7 @@ def _send_otp_email(user_email, otp, username):
         """
         
         params = {
-            "from": f"Optical ERP <{sender_email}>",
+            "from": sender_email,
             "to": [user_email],
             "subject": "Optical ERP — Your OTP for Password Reset",
             "html": html_body
