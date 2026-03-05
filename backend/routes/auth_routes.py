@@ -2,8 +2,7 @@ import random
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
-from flask_mail import Message
-from extensions import db, bcrypt, mail
+from extensions import db, bcrypt
 from models.user import User
 
 auth_bp = Blueprint('auth', __name__)
@@ -16,42 +15,38 @@ def _admin_required():
         return False
     return True
 
-import threading
+import resend
 from flask import current_app
-
-def _send_async_email(app, msg):
-    with app.app_context():
-        try:
-            mail.send(msg)
-        except Exception as e:
-            print(f"Async mail error: {e}")
 
 def _send_otp_email(user_email, otp, username):
     try:
-        msg = Message(
-            subject='Optical ERP — Your OTP for Password Reset',
-            recipients=[user_email],
-            body=f"""Hello {username},
-
-Your OTP for password reset is:
-
-  {otp}
-
-This OTP is valid for 10 minutes.
-If you did not request this, ignore this email.
-
-— Optical ERP
-"""
-        )
+        resend.api_key = current_app.config.get('RESEND_API_KEY')
+        sender_email = current_app.config.get('MAIL_DEFAULT_SENDER', 'onboarding@resend.dev')
         
-        # Send email asynchronously to prevent Gunicorn worker timeout
-        app = current_app._get_current_object()
-        thread = threading.Thread(target=_send_async_email, args=(app, msg))
-        thread.start()
+        html_body = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Optical ERP - Password Reset</h2>
+            <p>Hello {username},</p>
+            <p>Your OTP for password reset is:</p>
+            <h1 style="background: #f4f4f4; padding: 10px; border-radius: 5px; text-align: center; letter-spacing: 5px;">{otp}</h1>
+            <p>This OTP is valid for 10 minutes.</p>
+            <p style="color: #888; font-size: 12px; margin-top: 20px;">If you did not request this, you can safely ignore this email.</p>
+        </div>
+        """
         
+        params = {
+            "from": f"Optical ERP <{sender_email}>",
+            "to": [user_email],
+            "subject": "Optical ERP — Your OTP for Password Reset",
+            "html": html_body
+        }
+        
+        email = resend.Emails.send(params)
+        print(f"Resend accepted email: {email}")
         return True
+        
     except Exception as e:
-        print(f"Mail threading error: {e}")
+        print(f"Resend API error: {e}")
         return False
 
 
