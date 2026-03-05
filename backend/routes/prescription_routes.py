@@ -66,7 +66,8 @@ def add(customer_id):
 @login_required
 def history(customer_id):
     customer = Customer.query.get_or_404(customer_id)
-    prescriptions = Prescription.query.filter_by(customer_id=customer_id).order_by(Prescription.created_at.desc()).all()
+    page = request.args.get('page', 1, type=int)
+    prescriptions = Prescription.query.filter_by(customer_id=customer_id).order_by(Prescription.created_at.desc()).paginate(page=page, per_page=20)
     return render_template('prescriptions/history.html', customer=customer, prescriptions=prescriptions)
 
 @prescription_bp.route('/view/<int:id>')

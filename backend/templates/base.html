@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Optical Shop ERP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -12,97 +12,84 @@
 
 <body>
 
-    <!-- Sidebar (desktop) -->
+    <!-- Sidebar (responsive offcanvas) -->
     {% if current_user.is_authenticated %}
-    <nav id="sidebarMenu" class="d-md-block bg-dark sidebar collapse">
-        <div class="position-sticky pt-3">
-            <div class="px-3 mb-4 text-white">
-                <h4><i class="fas fa-glasses me-2"></i>Optical ERP</h4>
-            </div>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint and 'dashboard' in request.endpoint else '' }}"
-                        href="{{ url_for('dashboard.index') }}">
-                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint and 'customer' in request.endpoint else '' }}"
-                        href="{{ url_for('customer.index') }}">
-                        <i class="fas fa-users me-2"></i> Customers
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint and 'order' in request.endpoint else '' }}"
-                        href="{{ url_for('order.index') }}">
-                        <i class="fas fa-shopping-cart me-2"></i> Orders
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint and 'inventory' in request.endpoint else '' }}"
-                        href="{{ url_for('inventory.index') }}">
-                        <i class="fas fa-boxes me-2"></i> Inventory
-                    </a>
-                </li>
+    <nav id="sidebarMenu" class="offcanvas-md offcanvas-start bg-dark sidebar" tabindex="-1">
+        <div class="offcanvas-header border-bottom px-3 py-3 bg-dark d-md-none">
+            <h5 class="offcanvas-title text-white m-0 d-flex align-items-center">
+                <i class="fas fa-glasses me-2"></i>Optical ERP
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+                data-bs-target="#sidebarMenu" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body d-md-flex flex-column p-0 pt-md-3 overflow-y-auto">
+            <div class="position-sticky w-100">
+                <div class="px-3 mb-4 text-white d-none d-md-block">
+                    <h4><i class="fas fa-glasses me-2"></i>Optical ERP</h4>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint and 'dashboard' in request.endpoint else '' }}"
+                            href="{{ url_for('dashboard.index') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint and 'customer' in request.endpoint else '' }}"
+                            href="{{ url_for('customer.index') }}">
+                            <i class="fas fa-users me-2"></i> Customers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint and 'order' in request.endpoint else '' }}"
+                            href="{{ url_for('order.index') }}">
+                            <i class="fas fa-shopping-cart me-2"></i> Orders
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint and 'inventory' in request.endpoint else '' }}"
+                            href="{{ url_for('inventory.index') }}">
+                            <i class="fas fa-boxes me-2"></i> Inventory
+                        </a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint and 'audit' in request.endpoint else '' }}"
+                            href="{{ url_for('audit.index') }}">
+                            <i class="fas fa-history me-2"></i> Audit Logs
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
                 {% if current_user.is_admin %}
-                <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint and 'audit' in request.endpoint else '' }}"
-                        href="{{ url_for('audit.index') }}">
-                        <i class="fas fa-history me-2"></i> Audit Logs
-                    </a>
-                </li>
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Admin</span>
+                </h6>
+                <ul class="nav flex-column mb-2">
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint and 'auth.manage_users' in request.endpoint else '' }}"
+                            href="{{ url_for('auth.manage_users') }}">
+                            <i class="fas fa-user-shield me-2"></i> Manage Users
+                        </a>
+                    </li>
+                </ul>
                 {% endif %}
-            </ul>
 
-            {% if current_user.is_admin %}
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                <span>Admin</span>
-            </h6>
-            <ul class="nav flex-column mb-2">
-                <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint and 'auth.manage_users' in request.endpoint else '' }}"
-                        href="{{ url_for('auth.manage_users') }}">
-                        <i class="fas fa-user-shield me-2"></i> Manage Users
-                    </a>
-                </li>
-            </ul>
-            {% endif %}
-
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                <span>Account</span>
-            </h6>
-            <ul class="nav flex-column mb-2">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.logout') }}">
-                        <i class="fas fa-sign-out-alt me-2"></i> Logout
-                    </a>
-                </li>
-            </ul>
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Account</span>
+                </h6>
+                <ul class="nav flex-column mb-2">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <!-- Mobile Bottom Navigation Bar -->
-    <div id="mobileBottomNav">
-        <a href="{{ url_for('dashboard.index') }}"
-            class="{{ 'active' if request.endpoint and 'dashboard' in request.endpoint else '' }}">
-            <i class="fas fa-tachometer-alt"></i><span>Home</span>
-        </a>
-        <a href="{{ url_for('customer.index') }}"
-            class="{{ 'active' if request.endpoint and 'customer' in request.endpoint else '' }}">
-            <i class="fas fa-users"></i><span>Customers</span>
-        </a>
-        <a href="{{ url_for('order.index') }}"
-            class="{{ 'active' if request.endpoint and 'order' in request.endpoint else '' }}">
-            <i class="fas fa-shopping-cart"></i><span>Orders</span>
-        </a>
-        <a href="{{ url_for('inventory.index') }}"
-            class="{{ 'active' if request.endpoint and 'inventory' in request.endpoint else '' }}">
-            <i class="fas fa-boxes"></i><span>Stock</span>
-        </a>
-        <a href="{{ url_for('auth.logout') }}">
-            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
-        </a>
-    </div>
     {% endif %}
 
     <!-- Main Content Wrapper -->
@@ -113,7 +100,7 @@
         {% if current_user.is_authenticated %}
         <nav class="navbar navbar-expand-lg navbar-light bg-light rounded shadow-sm mb-4 mt-2">
             <div class="container-fluid">
-                <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse"
+                <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
                     aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>

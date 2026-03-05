@@ -43,6 +43,11 @@ def create_app(config_class=Config):
     with app.app_context():
         register_audit_listeners()
 
+    # 5. Ensure DB session cleanup on teardown
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db.session.remove()
+
     return app
 
 app = create_app()

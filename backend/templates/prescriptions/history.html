@@ -25,7 +25,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for rx in prescriptions %}
+            {% for rx in prescriptions.items %}
             <tr>
                 <td>{{ rx.created_at.strftime('%d-%m-%Y') }}</td>
                 <td>{{ rx.re_sph or '-' }} / {{ rx.re_cyl or '-' }} / {{ rx.re_axis or '-' }}</td>
@@ -58,6 +58,23 @@
         </tbody>
     </table>
 </div>
+
+{% if prescriptions.pages > 1 %}
+<nav aria-label="Page navigation" class="mt-3">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {{ 'disabled' if not prescriptions.has_prev }}">
+            <a class="page-link"
+                href="{{ url_for('prescription.history', customer_id=customer.id, page=prescriptions.prev_num) }}">Previous</a>
+        </li>
+        <li class="page-item disabled"><span class="page-link">Page {{ prescriptions.page }} of {{ prescriptions.pages
+                }}</span></li>
+        <li class="page-item {{ 'disabled' if not prescriptions.has_next }}">
+            <a class="page-link"
+                href="{{ url_for('prescription.history', customer_id=customer.id, page=prescriptions.next_num) }}">Next</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">

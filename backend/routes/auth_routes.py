@@ -184,7 +184,8 @@ def verify_otp():
 def manage_users():
     if not _admin_required():
         return redirect(url_for('dashboard.index'))
-    users = User.query.order_by(User.created_at.desc()).all()
+    page = request.args.get('page', 1, type=int)
+    users = User.query.order_by(User.created_at.desc()).paginate(page=page, per_page=20)
     return render_template('auth/manage_users.html', users=users)
 
 
