@@ -43,7 +43,7 @@
                     <!-- Middle Section: Line Items -->
                     <h5 class="mb-3">Order Items</h5>
                     <div class="table-responsive mb-3">
-                        <table class="table table-bordered" id="itemsTable">
+                        <table class="table table-bordered mobile-cards" id="itemsTable">
                             <thead class="table-light">
                                 <tr>
                                     <th>Item Description</th>
@@ -55,14 +55,16 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><input type="text" class="form-control" name="item_desc[]" required
-                                            placeholder="e.g. Frame Model X"></td>
-                                    <td><input type="number" class="form-control qty" name="quantity[]" value="1"
-                                            min="1" required></td>
-                                    <td><input type="number" class="form-control price" name="unit_price[]" value="0"
-                                            min="0" step="0.01" required></td>
-                                    <td><input type="text" class="form-control row-total" readonly value="0.00"></td>
-                                    <td><button type="button" class="btn btn-danger btn-sm remove-row"><i
+                                    <td data-label="Item"><input type="text" class="form-control" name="item_desc[]"
+                                            required placeholder="e.g. Frame Model X"></td>
+                                    <td data-label="Qty"><input type="number" class="form-control qty" name="quantity[]"
+                                            value="1" min="1" required></td>
+                                    <td data-label="Price"><input type="number" class="form-control price"
+                                            name="unit_price[]" value="0" min="0" step="0.01" required></td>
+                                    <td data-label="Total"><input type="text" class="form-control row-total" readonly
+                                            value="0.00"></td>
+                                    <td data-label="Action"><button type="button"
+                                            class="btn btn-danger btn-sm remove-row"><i
                                                 class="fas fa-times"></i></button></td>
                                 </tr>
                             </tbody>

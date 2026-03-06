@@ -22,7 +22,7 @@
 </div>
 
 <div class="table-responsive">
-    <table class="table table-hover table-bordered">
+    <table class="table table-hover table-bordered mobile-cards">
         <thead class="table-dark">
             <tr>
                 <th>Model Name</th>
@@ -39,20 +39,20 @@
         <tbody>
             {% for item in items.items %}
             <tr class="{{ 'table-danger' if item.is_low_stock else '' }}">
-                <td>
+                <td data-label="Model Name">
                     {{ item.model_name }}
                     {% if item.is_low_stock %}
                     <span class="badge bg-danger ms-2">Low Stock</span>
                     {% endif %}
                 </td>
-                <td>{{ item.brand }}</td>
-                <td>{{ item.frame_type }}</td>
-                <td>{{ item.location }}</td>
-                <td class="text-center fw-bold">{{ item.quantity }}</td>
-                <td><small class="text-muted">{{ item.color_stock or '-' }}</small></td>
-                <td class="text-end">{{ item.cost_price }}</td>
-                <td class="text-end">{{ item.selling_price }}</td>
-                <td>
+                <td data-label="Brand">{{ item.brand }}</td>
+                <td data-label="Type">{{ item.frame_type }}</td>
+                <td data-label="Location">{{ item.location }}</td>
+                <td data-label="Qty" class="text-center fw-bold">{{ item.quantity }}</td>
+                <td data-label="Color Stock"><small class="text-muted">{{ item.color_stock or '-' }}</small></td>
+                <td data-label="Cost" class="text-end">{{ item.cost_price }}</td>
+                <td data-label="Sell Price" class="text-end">{{ item.selling_price }}</td>
+                <td data-label="Actions">
                     <a href="{{ url_for('inventory.edit', id=item.id) }}" class="btn btn-sm btn-warning">
                         <i class="fas fa-edit"></i> Edit
                     </a>
@@ -60,7 +60,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="8" class="text-center">No inventory items found.</td>
+                <td colspan="8" class="text-center" data-label="Status">No inventory items found.</td>
             </tr>
             {% endfor %}
         </tbody>

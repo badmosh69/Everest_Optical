@@ -94,7 +94,7 @@
 
     <!-- Main Content Wrapper -->
     <main
-        class="{{ 'col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content' if current_user.is_authenticated else 'container mt-5' }}">
+        class="{{ 'col-md-9 ms-sm-auto col-lg-10 px-3 px-md-4 main-content flex-grow-1' if current_user.is_authenticated else 'container mt-5' }}">
 
         <!-- Top Navbar (Mobile Toggle + Dark Mode) -->
         {% if current_user.is_authenticated %}

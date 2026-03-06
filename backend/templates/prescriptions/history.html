@@ -12,7 +12,7 @@
 </div>
 
 <div class="table-responsive">
-    <table class="table table-bordered table-striped align-middle">
+    <table class="table table-bordered table-striped align-middle mobile-cards">
         <thead class="table-dark">
             <tr>
                 <th>Date</th>
@@ -27,13 +27,13 @@
         <tbody>
             {% for rx in prescriptions.items %}
             <tr>
-                <td>{{ rx.created_at.strftime('%d-%m-%Y') }}</td>
-                <td>{{ rx.re_sph or '-' }} / {{ rx.re_cyl or '-' }} / {{ rx.re_axis or '-' }}</td>
-                <td>{{ rx.le_sph or '-' }} / {{ rx.le_cyl or '-' }} / {{ rx.le_axis or '-' }}</td>
-                <td>{{ rx.addition or '-' }}</td>
-                <td>{{ rx.notes or '-' }}</td>
-                <td>{{ rx.creator.username if rx.creator else 'System' }}</td>
-                <td>
+                <td data-label="Date">{{ rx.created_at.strftime('%d-%m-%Y') }}</td>
+                <td data-label="RE">{{ rx.re_sph or '-' }} / {{ rx.re_cyl or '-' }} / {{ rx.re_axis or '-' }}</td>
+                <td data-label="LE">{{ rx.le_sph or '-' }} / {{ rx.le_cyl or '-' }} / {{ rx.le_axis or '-' }}</td>
+                <td data-label="ADD">{{ rx.addition or '-' }}</td>
+                <td data-label="Notes">{{ rx.notes or '-' }}</td>
+                <td data-label="By">{{ rx.creator.username if rx.creator else 'System' }}</td>
+                <td data-label="Actions">
                     <div class="d-flex gap-1 flex-wrap">
                         <a href="{{ url_for('prescription.view', id=rx.id) }}" class="btn btn-sm btn-primary">
                             <i class="fas fa-eye"></i> View
@@ -52,7 +52,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" class="text-center">No prescriptions found.</td>
+                <td colspan="7" class="text-center" data-label="Status">No prescriptions found.</td>
             </tr>
             {% endfor %}
         </tbody>

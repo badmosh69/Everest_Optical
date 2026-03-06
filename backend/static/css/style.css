@@ -1,6 +1,10 @@
+html,
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
 }
 
 /* ── SIDEBAR (desktop) ─────────────────────────────────── */
@@ -57,6 +61,68 @@ body {
     td .d-flex {
         flex-wrap: wrap;
         gap: 4px;
+    }
+
+    /* ── MOBILE CARDS FOR TABLES ── */
+    .mobile-cards,
+    .mobile-cards tbody,
+    .mobile-cards tr,
+    .mobile-cards td {
+        display: block;
+        width: 100%;
+    }
+
+    .mobile-cards thead {
+        display: none;
+    }
+
+    .mobile-cards tr {
+        margin-bottom: 1rem;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        padding: 0.5rem;
+    }
+
+    [data-bs-theme="dark"] .mobile-cards tr {
+        background-color: #2b3035;
+        border-color: #373b3e;
+    }
+
+    .mobile-cards td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        border: none !important;
+        border-bottom: 1px solid #f8f9fa !important;
+        text-align: right;
+    }
+
+    [data-bs-theme="dark"] .mobile-cards td {
+        border-bottom-color: #373b3e !important;
+    }
+
+    .mobile-cards td:last-child {
+        border-bottom: none !important;
+    }
+
+    /* Pseudo-element to act as the column header label */
+    .mobile-cards td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        text-align: left;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* Adjust inputs in mobile card cells */
+    .mobile-cards td .form-control,
+    .mobile-cards td .form-select {
+        width: auto;
+        flex-grow: 1;
+        max-width: 60%;
     }
 }
 

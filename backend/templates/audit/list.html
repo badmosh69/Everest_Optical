@@ -25,7 +25,7 @@
 </div>
 
 <div class="table-responsive">
-    <table class="table table-sm table-striped table-hover font-monospace">
+    <table class="table table-sm table-striped table-hover font-monospace mobile-cards">
         <thead class="table-dark">
             <tr>
                 <th>Timestamp</th>
@@ -40,24 +40,26 @@
         <tbody>
             {% for log in logs.items %}
             <tr>
-                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                <td>{{ log.user.username if log.user else 'System' }}</td>
-                <td>
+                <td data-label="Timestamp">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td data-label="User">{{ log.user.username if log.user else 'System' }}</td>
+                <td data-label="Action">
                     <span
                         class="badge bg-{{ 'success' if log.action == 'INSERT' else 'warning' if log.action == 'UPDATE' else 'danger' }}">
                         {{ log.action }}
                     </span>
                 </td>
-                <td>{{ log.table_name }}:{{ log.record_id }}</td>
-                <td>{{ log.field_name or '-' }}</td>
-                <td class="text-truncate" style="max-width: 150px;" title="{{ log.old_value }}">{{ log.old_value or ''
+                <td data-label="Table:ID">{{ log.table_name }}:{{ log.record_id }}</td>
+                <td data-label="Field">{{ log.field_name or '-' }}</td>
+                <td data-label="Old Value" class="text-truncate" style="max-width: 150px;" title="{{ log.old_value }}">
+                    {{ log.old_value or ''
                     }}</td>
-                <td class="text-truncate" style="max-width: 150px;" title="{{ log.new_value }}">{{ log.new_value or ''
+                <td data-label="New Value" class="text-truncate" style="max-width: 150px;" title="{{ log.new_value }}">
+                    {{ log.new_value or ''
                     }}</td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" class="text-center">No logs found.</td>
+                <td colspan="7" class="text-center" data-label="Status">No logs found.</td>
             </tr>
             {% endfor %}
         </tbody>
